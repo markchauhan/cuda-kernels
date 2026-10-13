@@ -2,6 +2,10 @@
 
 CUDA kernels in C++17 with RAII device memory, tested against CPU references.
 
+All tests pass on an NVIDIA Tesla T4, with compute-sanitizer reporting 0 memory
+errors: see the [Kaggle notebook](https://www.kaggle.com/code/markc16/notebookfbf9c54a7e)
+or the saved run in [`notebooks/kaggle_t4_run.ipynb`](notebooks/kaggle_t4_run.ipynb).
+
 ## Kernels
 
 - **Vector add** (`src/vecadd.cu`): one thread per element, `c[i] = a[i] + b[i]`.
