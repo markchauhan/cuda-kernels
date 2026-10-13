@@ -1,6 +1,8 @@
 #include <cuda_runtime.h>
 #include <gtest/gtest.h>
 
+#include <random>
+#include <stdexcept>
 #include <vector>
 
 #include "cuda_kernels/DeviceBuffer.h"
@@ -26,7 +28,7 @@ bool hasCudaDevice() {
 TEST(VecAdd, MatchesCpuReference) {
     SKIP_IF_NO_GPU();
 
-    const int n = 1 << 20 + 1;  // 1M elements
+    const int n = (1 << 20) + 1;  // 1M elements
     std::vector<float> a(n), b(n), c(n);
     for (int i = 0; i < n; i++) {
         a[i] = static_cast<float>(i);
