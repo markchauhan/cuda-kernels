@@ -17,9 +17,7 @@ __global__ void vecAddKernel(const float* a, const float* b, float* c, int n) {
 }  // namespace
 
 void vecAdd(const float* d_a, const float* d_b, float* d_c, int n) {
-    if (n <= 0) {
-        throw std::invalid_argument("vecAdd: n must be positive");
-    }
+    if (n <= 0) return;
     
     const int threads = 256;
     const int blocks = (n + threads - 1) / threads;

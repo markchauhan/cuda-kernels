@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 #include <gtest/gtest.h>
-
+#include <cmath>
 #include <random>
 #include <stdexcept>
 #include <vector>
@@ -53,14 +53,58 @@ TEST(VecAdd, EmptyInputIsNoOp) {
 
 TEST(Reduce, V1MatchesCpuReference) {
     SKIP_IF_NO_GPU();
-    // TODO: fill a host array, sum it on the CPU as the reference, run
-    // reduceSumV1 on the GPU, and check the relative error is below 1e-4.
-    GTEST_SKIP() << "not implemented yet";
+
+    const int n = (1 << 24) + 1;
+    std::vector<float> h(n);
+    std::mt19937 rng(123);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    
+    for (auto& x : h) {
+        x = dist(rng);
+    }
+
+    double expected = 0.0;
+    for (float x : h) {
+        expected += x;
+    }
+
+    cuda_kernels::DeviceBuffer<float> d_data(n);
+    cuda_kernels::DeviceBuffer<float> d_total(1);
+
+    d_data.copyFromHost(h.data());
+    cuda_kernels::reduceSumV1(d_data.get(), d_total.get(), n);
+
+    float got = 0.0f;
+    d_total.copyToHost(&got);
+    EXPECT_NEAR(got, expected, 1e-4 * std::abs(expected));
+
 }
 
 TEST(Reduce, V2MatchesCpuReference) {
     SKIP_IF_NO_GPU();
-    // TODO: fill a host array, sum it on the CPU as the reference, run
-    // reduceSumV2 on the GPU, and check the relative error is below 1e-4.
-    GTEST_SKIP() << "not implemented yet";
+
+    const int n = (1 << 24) + 1;
+
+    std::vector<float> h(n);
+    std::mt19937 rng(42);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
+    for (auto& x : h) {
+        x = dist(rng);
+    }
+
+    double expected = 0.0;
+    for (float x : h) {
+        expected += x;
+    }
+
+    cuda_kernels::DeviceBuffer<float> d_data(n);
+    cuda_kernels::DeviceBuffer<float> d_total(1);
+
+    d_data.copyFromHost(h.data());
+    cuda_kernels::reduceSumV2(d_data.get(), d_total.get(), n, 64);
+
+    float got = 0.0f;
+    d_total.copyToHost(&got);
+    EXPECT_NEAR(got, expected, 1e-4 * std::abs(expected));
 }
