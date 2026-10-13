@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: nvidia/cuda:12.6.3-devel-ubuntu24.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      # Ubuntu 24.04 ships CMake 3.28, which satisfies the 3.24 minimum.
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends cmake git build-essential ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build
+
+      - name: Build
+        run: cmake --build build -j
+
+      # Tests are NOT run here: GitHub-hosted runners have no GPU, so CI only
+      # checks that everything compiles. Run ctest manually on a GPU machine.
